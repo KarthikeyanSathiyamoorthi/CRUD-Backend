@@ -1,5 +1,6 @@
 require("dotenv").config(); // access env file
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const todoRoutes = require("./routes/todo");
@@ -10,6 +11,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
 // local variables
 const PORT = process.env.PORT;
@@ -28,6 +30,6 @@ app.use("", authRoutes);
 // Start server
 app.listen(PORT, () => {
   console.log(
-    `Server running on PORT: ${PORT} and the app name is ${APP_NAME}`
+    `Server running on PORT: ${PORT} and the app name is ${APP_NAME}`,
   );
 });

@@ -1,6 +1,7 @@
 const express = require("express");
 // Todo Model
 const Todo = require("../models/Todo");
+const authenticateToken = require("../middleware/authenticateToken");
 
 const router = express.Router();
 
@@ -38,7 +39,7 @@ router.post("/create", async (req, res) => {
 });
 
 // GET API - Get all Todos
-router.get("/todos", async (_, res) => {
+router.get("/todos", authenticateToken, async (_, res) => {
   try {
     const todos = await Todo.find();
     setTimeout(() => {
@@ -71,7 +72,7 @@ router.put("/update/:id", async (req, res) => {
       {
         new: true, // Return the updated document
         runValidators: true, // Run schema validations
-      }
+      },
     );
     // if todo not found
     if (!updatedTodo) {
