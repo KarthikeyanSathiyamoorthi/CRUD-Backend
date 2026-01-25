@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
+const authenticateToken = require("../middleware/authenticateToken");
 
 const router = express.Router();
 
@@ -57,11 +58,19 @@ router.post("/login", async (req, res) => {
     user.refreshToken = refreshToken;
     await user.save();
 
+    // set BOTH tokens as HttpOnly cookies
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 10 * 60 * 1000, // 10 minutes
+    });
+
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     res.status(200).json({
@@ -70,32 +79,37 @@ router.post("/login", async (req, res) => {
         id: user._id,
         email: user.email,
       },
-      accessToken: accessToken,
-      refreshToken: refreshToken,
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Refresh API
+// Refresh API - automatically called by frontend when access token expires
 router.post("/refresh", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken)
-    return res.status(401).json({ message: "Token is missing." });
+    return res.status(401).json({ message: "Refrsh token is missing" });
 
   const user = await User.findOne({ refreshToken });
   if (!user)
     return res.status(403).json({
-      message: "Invalid token or token is deleted from the database.",
+      message: "Invalid refresh token",
     });
 
   try {
     jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const accessToken = generateAccessToken(user);
-    res
-      .status(201)
-      .json({ message: "Token is created.", accessToken: accessToken });
+    const newAccessToken = generateAccessToken(user);
+
+    // set new access token as a cookie
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 10 * 60 * 1000, // 10 minutes
+    });
+
+    res.status(201).json({ message: "Token refreshed successfully" });
   } catch (error) {
     res.status(403).json({ message: "Invaild Token." });
   }
@@ -104,16 +118,28 @@ router.post("/refresh", async (req, res) => {
 // Logout API
 router.post("/logout", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken)
-    return res.status(401).json({ message: "Token is missing." });
-
-  const user = await User.findOne({ refreshToken });
-  if (user) {
-    user.refreshToken = null;
-    await user.save();
+  if (refreshToken) {
+    const user = await User.findOne({ refreshToken });
+    if (user) {
+      user.refreshToken = null;
+      await user.save();
+    }
   }
+  res.clearCookie("accessToken");
   res.clearCookie("refreshToken");
-  res.status(204).send();
+  res.status(200).send({ message: "Logged out successfully" });
+});
+
+// Protected route example
+router.get("/me", authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select(
+      "-password -refreshToken",
+    );
+    res.json({ user: user });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = router;
