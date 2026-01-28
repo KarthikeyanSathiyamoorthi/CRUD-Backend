@@ -6,7 +6,7 @@ const authenticateToken = require("../middleware/authenticateToken");
 const router = express.Router();
 
 // POST API - Add new Tado
-router.post("/create", async (req, res) => {
+router.post("/create", authenticateToken, async (req, res) => {
   try {
     const { title, description } = req.body;
     if (!title || !description) {
@@ -42,12 +42,10 @@ router.post("/create", async (req, res) => {
 router.get("/todos", authenticateToken, async (_, res) => {
   try {
     const todos = await Todo.find();
-    setTimeout(() => {
-      res.status(200).json({
-        success: true,
-        data: todos,
-      });
-    }, 2000);
+    res.status(200).json({
+      success: true,
+      data: todos,
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -57,7 +55,7 @@ router.get("/todos", authenticateToken, async (_, res) => {
 });
 
 // PUT API - Update a Todo
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description } = req.body;
@@ -97,7 +95,7 @@ router.put("/update/:id", async (req, res) => {
 });
 
 // DELETE API - Delete a Todo
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
     const deletedTodo = await Todo.findByIdAndDelete(id);

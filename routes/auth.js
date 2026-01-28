@@ -70,7 +70,7 @@ router.post("/login", async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 1 * 24 * 60 * 60 * 1000, // 1 day
     });
 
     res.status(200).json({
@@ -133,7 +133,7 @@ router.post("/logout", async (req, res) => {
 // Protected route example
 router.get("/me", authenticateToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId).select(
+    const user = await User.findById(req.user.id).select(
       "-password -refreshToken",
     );
     res.json({ user: user });
