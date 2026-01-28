@@ -9,7 +9,12 @@ const authRoutes = require("./routes/auth");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // Your React app URL
+    credentials: true, // Allow cookies to be sent
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
