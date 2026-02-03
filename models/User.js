@@ -2,10 +2,16 @@ const mongoose = require("mongoose");
 
 // Define the structure of the User Date
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "Name is required"],
+    trim: true,
+  },
   email: {
     type: String,
     required: [true, "Email is required"],
     unique: true,
+    lowercase: true,
   },
   password: {
     type: String,
@@ -13,6 +19,7 @@ const userSchema = new mongoose.Schema({
   },
   refreshToken: {
     type: String,
+    select: false,
   },
 });
 
