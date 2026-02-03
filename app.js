@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const todoRoutes = require("./routes/todo");
 const authRoutes = require("./routes/auth");
+const errorHandler = require("./middleware/errorHandler");
+const AppError = require("./utils/AppError");
 
 const app = express();
 
@@ -15,7 +17,7 @@ app.use(
     credentials: true, // Allow cookies to be sent
   }),
 );
-app.use(express.json());
+app.use(express.json()); // Parses incoming JSON requests
 app.use(cookieParser());
 
 // local variables
@@ -31,6 +33,14 @@ mongoose
 // Routes
 app.use("/api/v1", todoRoutes);
 app.use("", authRoutes);
+
+// Handle 404 errors
+app.use((req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+});
+
+// Error handling middleware (MUST be last)
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
