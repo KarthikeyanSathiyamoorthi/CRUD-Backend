@@ -35,6 +35,14 @@ const userLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide email and password",
+      });
+    }
+
     // Find user
     const user = await User.findOne({ email });
 
@@ -73,6 +81,7 @@ const userLogin = async (req, res) => {
       data: {
         id: user._id,
         email: user.email,
+        name: user.name,
       },
     });
   } catch (error) {

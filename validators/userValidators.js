@@ -1,9 +1,9 @@
 const Joi = require("joi");
 
 const registerSchema = Joi.object({
-  name: Joi.string().min(3).max(25).required().messages({
+  name: Joi.string().min(3).max(50).required().messages({
     "string.min": "Name must be at least 3 characters",
-    "string.max": "Name cannot be exceed 25 characters",
+    "string.max": "Name cannot be exceed 50 characters",
     "any.required": "Name is required",
   }),
   email: Joi.string().email().required().messages({
