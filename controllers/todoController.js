@@ -117,6 +117,7 @@ const createTodo = asyncHandler(async (req, res) => {
   const newTodo = new Todo({
     title,
     description,
+    author: req.user.id, // Get user ID from the authenticated request
   });
 
   // save to Database
@@ -129,8 +130,11 @@ const createTodo = asyncHandler(async (req, res) => {
   });
 });
 
-const getAllTodos = asyncHandler(async (_, res) => {
-  const todos = await Todo.find();
+const getAllTodos = asyncHandler(async (req, res) => {
+  const todos = await Todo.find({ author: req.user.id })
+    .populate("author", "name email") // Optionally populate author details
+    .sort({ createdAt: -1 }); // Sort by newest first
+
   res.status(200).json({
     success: true,
     data: todos,
@@ -141,51 +145,49 @@ const updateTodo = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const { title, description } = req.body;
 
-  // Find todo by ID and update it
-  const updatedTodo = await Todo.findByIdAndUpdate(
-    id,
-    {
-      title,
-      description,
-    },
-    {
-      new: true, // Return the updated document
-      runValidators: true, // Run schema validations
-    },
-  );
+  // Find the todo first
+  const todo = await Todo.findById(id);
 
-  // if todo not found
-  if (!updatedTodo) {
+  if (!todo) {
     return next(new AppError("Todo not found", 404));
   }
 
-  // Success response
+  // Check if the user is the author
+  if (todo.author.toString() !== req.user.id) {
+    return next(new AppError("Not authorized to update this todo", 403));
+  }
+
+  // Update the todo
+  todo.title = title;
+  todo.description = description;
+  const updatedTodo = await todo.save();
+
   res.status(200).json({
     success: true,
-    message: "Todo updated Successfully",
+    message: "Todo updated successfully",
     data: updatedTodo,
   });
 });
 
 const deletedTodo = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const deletedTodo = await Todo.findById(id);
+  const todo = await Todo.findById(id);
   // if Todo not found
-  if (!deletedTodo) {
+  if (!todo) {
     return next(new AppError("Todo not found", 404));
   }
 
-  if (deletedTodo._id.toString() !== id) {
+  if (todo.author.toString() !== req.user.id) {
     return next(new AppError("Not authorized to delete this item", 403));
   }
 
-  await deletedTodo.deleteOne();
+  await todo.deleteOne();
 
   // success response
   res.status(200).json({
     success: true,
     message: "Todo deleted successfully",
-    data: deletedTodo.toObject(), // convert to plain object
+    data: todo.toObject(), // convert to plain object
   });
 });
 

@@ -23,6 +23,11 @@ const todoSchema = new mongoose.Schema(
         "Description can only contain letters, numbers, spaces, and basic punctuation",
       ],
     },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Reference to User collection
+      required: [true, "Todo must belong to an user"],
+    },
   },
   { timestamps: true },
 );
