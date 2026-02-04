@@ -15,7 +15,7 @@ const errorHandler = (err, req, res, next) => {
   if (err.name === "ValidationError") {
     statusCode = 400;
     const errors = Object.values(err.errors).map((e) => e.message);
-    message = errors.join("");
+    message = errors.join(",");
   }
 
   // JWT errors
