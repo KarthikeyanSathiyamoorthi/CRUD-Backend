@@ -131,7 +131,18 @@ const createTodo = asyncHandler(async (req, res) => {
 });
 
 const getAllTodos = asyncHandler(async (req, res) => {
-  const todos = await Todo.find({ author: req.user.id })
+  const { q } = req.query;
+  let filter = { author: req.user.id };
+
+  // Text search using the text index
+  if (q && q.trim() !== "") {
+    filter.$or = [
+      { title: { $regex: `^${q}`, $options: "i" } },
+      { description: { $regex: `^${q}`, $options: "i" } },
+    ];
+  }
+
+  const todos = await Todo.find(filter)
     .populate("author", "name email") // Optionally populate author details
     .sort({ createdAt: -1 }); // Sort by newest first
 
@@ -191,4 +202,9 @@ const deletedTodo = asyncHandler(async (req, res, next) => {
   });
 });
 
-module.exports = { createTodo, getAllTodos, updateTodo, deletedTodo };
+module.exports = {
+  createTodo,
+  getAllTodos,
+  updateTodo,
+  deletedTodo,
+};
