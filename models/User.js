@@ -35,14 +35,14 @@ const userSchema = new mongoose.Schema(
   },
 );
 
-// Create virtual field
-userSchema.virtual("daysAgo").get(function () {
-  const now = new Date();
-  const created = this.createdAt;
-  const diffInMs = now - created;
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-  return diffInDays;
-});
+// // Create virtual field
+// userSchema.virtual("daysAgo").get(function () {
+//   const now = new Date();
+//   const created = this.createdAt;
+//   const diffInMs = now - created;
+//   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+//   return diffInDays;
+// });
 
 // Enable virtuals in JSON output
 userSchema.set("toJSON", { virtuals: true });
