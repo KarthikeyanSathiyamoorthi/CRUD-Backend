@@ -10,6 +10,8 @@ const AppError = require("./utils/AppError");
 
 const app = express();
 
+console.log(`process.env.FRONTEND_URL: ${process.env.FRONTEND_URL}`);
+
 // Middleware
 app.use(
   cors({
