@@ -10,7 +10,12 @@ const AppError = require("./utils/AppError");
 
 const app = express();
 
-console.log(`process.env.FRONTEND_URL: ${process.env.FRONTEND_URL}`);
+app.use((req, res, next) => {
+  console.log("Incoming Origin:", req.headers.origin);
+  console.log("Expected Origin:", process.env.FRONTEND_URL);
+  console.log("Match:", req.headers.origin === process.env.FRONTEND_URL);
+  next();
+});
 
 // Middleware
 app.use(
