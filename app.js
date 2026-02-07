@@ -23,6 +23,7 @@ app.use(cookieParser());
 // local variables
 const PORT = process.env.PORT;
 const APP_NAME = process.env.APP_NAME;
+const ENVIRONMENT = process.env.NODE_ENV;
 
 // connect to MongoDB
 mongoose
@@ -45,6 +46,6 @@ app.use(errorHandler);
 // Start server
 app.listen(PORT, () => {
   console.log(
-    `Server running on PORT: ${PORT} and the app name is ${APP_NAME}`,
+    `Server running on PORT: ${PORT} and the app name is ${APP_NAME} and the environment is ${ENVIRONMENT}`,
   );
 });
