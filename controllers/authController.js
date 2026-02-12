@@ -127,8 +127,16 @@ const logout = async (req, res) => {
       await user.save();
     }
   }
-  res.clearCookie("accessToken");
-  res.clearCookie("refreshToken");
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+  });
   res.status(200).send({ message: "Logged out successfully" });
 };
 
