@@ -6,11 +6,7 @@ const uploadAvatarPhoto = asyncHandler(async (req, res) => {
   // Find the avatar first
   const avatar = await Avatar.findOne({ userId: req.body.userId });
   if (avatar) {
-    // Delete the old file from disk before updating
-    const oldFilePath = avatar.filepath;
-    if (oldFilePath && fs.existsSync(oldFilePath)) {
-      fs.unlinkSync(oldFilePath);
-    }
+    deleteOldFilePath(avatar);
 
     avatar.filename = req.file.filename;
     avatar.filepath = req.file.path;
@@ -62,4 +58,31 @@ const getAvatarPhoto = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { uploadAvatarPhoto, getAvatarPhoto };
+const deleteAvatarPhoto = asyncHandler(async (req, res, next) => {
+  // Find the avatar first
+  const avatar = await Avatar.findOne({ userId: req.params.id });
+  // if Todo not found
+  if (!avatar) {
+    return next(new AppError("Avatar not found", 404));
+  }
+
+  deleteOldFilePath(avatar);
+
+  await avatar.deleteOne();
+
+  // success response
+  res.status(200).json({
+    success: true,
+    message: "Avatar deleted successfully",
+  });
+});
+
+// Delete the old file from disk before updating
+const deleteOldFilePath = (avatar) => {
+  const oldFilePath = avatar.filepath;
+  if (oldFilePath && fs.existsSync(oldFilePath)) {
+    fs.unlinkSync(oldFilePath);
+  }
+};
+
+module.exports = { uploadAvatarPhoto, getAvatarPhoto, deleteAvatarPhoto };
