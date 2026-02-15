@@ -1,10 +1,12 @@
 require("dotenv").config(); // access env file
 const express = require("express");
+const path = require("path");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const todoRoutes = require("./routes/todo");
 const authRoutes = require("./routes/auth");
+const avatarRoutes = require("./routes/avatar");
 const errorHandler = require("./middleware/errorHandler");
 const AppError = require("./utils/AppError");
 
@@ -20,6 +22,9 @@ app.use(
 app.use(express.json()); // Parses incoming JSON requests
 app.use(cookieParser());
 
+// IMPORTANT: Serve static files from uploads directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // local variables
 const PORT = process.env.PORT;
 const APP_NAME = process.env.APP_NAME;
@@ -33,10 +38,11 @@ mongoose
 
 // Routes
 app.use("/api/v1", todoRoutes);
+app.use("/api/v1", avatarRoutes);
 app.use("", authRoutes);
 
 // Handle 404 errors
-app.use((req, res, next) => {
+app.use((req, _, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
 
