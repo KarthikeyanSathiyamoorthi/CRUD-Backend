@@ -1,0 +1,65 @@
+const asyncHandler = require("../middleware/asyncHandler");
+const Avatar = require("../models/Avatar");
+const fs = require("fs");
+
+const uploadAvatarPhoto = asyncHandler(async (req, res) => {
+  // Find the avatar first
+  const avatar = await Avatar.findOne({ userId: req.body.userId });
+  if (avatar) {
+    // Delete the old file from disk before updating
+    const oldFilePath = avatar.filepath;
+    if (oldFilePath && fs.existsSync(oldFilePath)) {
+      fs.unlinkSync(oldFilePath);
+    }
+
+    avatar.filename = req.file.filename;
+    avatar.filepath = req.file.path;
+    avatar.mimetype = req.file.mimetype;
+    avatar.size = req.file.size;
+    avatar.uploadedAt = new Date();
+
+    const updatedAvatar = await avatar.save();
+    return res.status(201).json({
+      success: true,
+      message: "Avatar updated successfully",
+      data: updatedAvatar,
+    });
+  }
+
+  // Save file metadata to database
+  const photoData = {
+    userId: req.body.userId, // from form data
+    filename: req.file.filename,
+    filepath: req.file.path,
+    mimetype: req.file.mimetype,
+    size: req.file.size,
+    uploadedAt: new Date(),
+  };
+
+  // save to Database
+  const savedAvatar = await Avatar.create(photoData);
+
+  res.status(201).json({
+    success: true,
+    message: "Avatar saved successfully",
+    data: savedAvatar,
+  });
+});
+
+const getAvatarPhoto = asyncHandler(async (req, res) => {
+  // Get photo info from database
+  const avatar = await Avatar.findOne({ userId: req.params.id });
+  if (!avatar) {
+    return res.status(404).json({
+      success: false,
+      photoUrl: `Avatar not found`,
+    });
+  }
+
+  res.status(200).json({
+    success: true,
+    photoUrl: `/uploads/${avatar.filename}`,
+  });
+});
+
+module.exports = { uploadAvatarPhoto, getAvatarPhoto };
