@@ -1,6 +1,18 @@
+import { NextFunction, Request, Response } from "express";
+
 const jwt = require("jsonwebtoken");
 
-const authenticateToken = (req, res, next) => {
+interface AuthenticateTokenRequest extends Request {
+  user: {
+    id: string;
+  };
+}
+
+const authenticateToken = (
+  req: AuthenticateTokenRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   const accessToken = req.cookies.accessToken;
 
   if (!accessToken)
@@ -10,7 +22,7 @@ const authenticateToken = (req, res, next) => {
     const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded;
     next();
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({ message: "Access token expired" });
     }
@@ -19,3 +31,4 @@ const authenticateToken = (req, res, next) => {
 };
 
 module.exports = authenticateToken;
+export {};

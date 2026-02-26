@@ -1,3 +1,5 @@
+import { NextFunction, Request, Response } from "express";
+
 require("dotenv").config(); // access env file
 const express = require("express");
 const path = require("path");
@@ -23,7 +25,7 @@ app.use(express.json()); // Parses incoming JSON requests
 app.use(cookieParser());
 
 // IMPORTANT: Serve static files from uploads directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // local variables
 const PORT = process.env.PORT;
@@ -34,7 +36,7 @@ const ENVIRONMENT = process.env.NODE_ENV;
 mongoose
   .connect(process.env.MONGODB_URL)
   .then(() => console.log("Conneted to MongoDB"))
-  .catch((err) => console.error("MongoDb connection error: ", err));
+  .catch((err: unknown) => console.error("MongoDb connection error: ", err));
 
 // Routes
 app.use("/api/v1", todoRoutes);
@@ -42,7 +44,7 @@ app.use("/api/v1", avatarRoutes);
 app.use("", authRoutes);
 
 // Handle 404 errors
-app.use((req, _, next) => {
+app.use((req: Request, _: Response, next: NextFunction) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
 

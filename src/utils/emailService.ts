@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // function to welcome mail
-const sendWelcomeEmail = async (userEmail, userName) => {
+const sendWelcomeEmail = async (userEmail: string, userName: string) => {
   try {
     const emailOptions = {
       from: process.env.EMAIL_USER,
@@ -34,3 +34,4 @@ const sendWelcomeEmail = async (userEmail, userName) => {
 };
 
 module.exports = { sendWelcomeEmail };
+export {};

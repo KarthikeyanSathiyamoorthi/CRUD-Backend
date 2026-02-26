@@ -15,3 +15,4 @@ const avatarSchema = new mongoose.Schema({
 
 const Avatar = mongoose.model("Avatar", avatarSchema);
 module.exports = Avatar;
+export {};

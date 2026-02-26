@@ -1,9 +1,17 @@
+import { Request, Response } from "express";
+
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const { generateAccessToken, generateRefreshToken } = require("../utils/token");
 
-const registerUser = async (req, res) => {
+interface ProtectedRouteRequest {
+  user: {
+    id: string;
+  };
+}
+
+const registerUser = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
 
@@ -26,12 +34,14 @@ const registerUser = async (req, res) => {
     await user.save();
 
     res.status(201).json({ message: "User registered successfully" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Something went wrong";
+    res.status(500).json({ error: message });
   }
 };
 
-const userLogin = async (req, res) => {
+const userLogin = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
@@ -84,12 +94,14 @@ const userLogin = async (req, res) => {
         name: user.name,
       },
     });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Something went wrong";
+    res.status(500).json({ error: message });
   }
 };
 
-const refresh = async (req, res) => {
+const refresh = async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken)
     return res.status(401).json({ message: "Refresh token is missing" });
@@ -118,7 +130,7 @@ const refresh = async (req, res) => {
   }
 };
 
-const logout = async (req, res) => {
+const logout = async (req: Request, res: Response) => {
   const refreshToken = req.cookies.refreshToken;
   if (refreshToken) {
     const user = await User.findOne({ refreshToken });
@@ -140,15 +152,20 @@ const logout = async (req, res) => {
   res.status(200).send({ message: "Logged out successfully" });
 };
 
-const protectedRoute = async (req, res) => {
+const protectedRoute = async (req: ProtectedRouteRequest, res: Response) => {
   try {
     const user = await User.findById(req.user.id).select(
       "-password -refreshToken",
     );
     res.json({ user: user });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Something went wrong";
+    res.status(500).json({
+      error: message,
+    });
   }
 };
 
 module.exports = { registerUser, userLogin, refresh, logout, protectedRoute };
+export {};

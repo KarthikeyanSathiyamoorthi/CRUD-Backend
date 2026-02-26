@@ -1,5 +1,4 @@
 const express = require("express");
-const multer = require("multer");
 const upload = require("../middleware/avatarUpload");
 const {
   uploadAvatarPhoto,
@@ -19,3 +18,4 @@ router.get("/avatar/:id", getAvatarPhoto);
 router.delete("/avatar/delete/:id", deleteAvatarPhoto);
 
 module.exports = router;
+export {};
