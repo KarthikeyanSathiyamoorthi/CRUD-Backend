@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon  src/app.ts",
     "build": "tsc",
-    "postinstall": "npm run tsc",
-    "dev": "dotenv -e .env nodemon app.js",
-    "start:staging": "dotenv -e .env.staging node app.js",
-    "start:production": "dotenv -e .env.production node app.js",
+    "start": "node dist/app.js",
+    "postinstall": "npm run build",
+    "dev": "dotenv -e .env nodemon src/app.ts",
+    "start:staging": "dotenv -e .env.staging node dist/app.js",
+    "start:production": "dotenv -e .env.production node dist/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
