@@ -1,4 +1,21 @@
-const errorHandler = (err, req, res, next) => {
+import { NextFunction, Request, Response } from "express";
+
+interface AppError extends Error {
+  statusCode?: number;
+  code?: number; // MongoDB duplicate key
+  keyValue?: Record<string, string>; // MongoDB duplicate key field
+  errors?: Record<string, { message: string }>; // MongoDB validation errors
+  path?: string; // MongoDB CastError
+  value?: string; // MongoDB CastError
+  stack?: string; // Error stack trace
+}
+
+const errorHandler = (
+  err: AppError,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
 
@@ -7,14 +24,14 @@ const errorHandler = (err, req, res, next) => {
   // MongoDB duplicate key error
   if (err.code === 11000) {
     statusCode = 400;
-    const field = Object.keys(err.keyValue)[0];
+    const field = Object.keys(err.keyValue || {})[0];
     message = `${field} already exists`;
   }
 
   // MongoDB validation error
   if (err.name === "ValidationError") {
     statusCode = 400;
-    const errors = Object.values(err.errors).map((e) => e.message);
+    const errors = Object.values(err.errors || {}).map((e) => e.message);
     message = errors.join(",");
   }
 
@@ -48,3 +65,4 @@ const errorHandler = (err, req, res, next) => {
 };
 
 module.exports = errorHandler;
+export {};

@@ -1,7 +1,17 @@
+import { Document, Schema } from "mongoose";
+
 const mongoose = require("mongoose");
 
+export interface ITodo extends Document {
+  title: string;
+  description: string;
+  author: Schema.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Define the structure of the Todo data
-const todoSchema = new mongoose.Schema(
+const todoSchema: ITodo = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -35,3 +45,4 @@ const todoSchema = new mongoose.Schema(
 // Create and export the  Model
 const Todo = mongoose.model("Todo", todoSchema);
 module.exports = Todo;
+export {};

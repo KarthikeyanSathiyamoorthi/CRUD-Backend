@@ -1,18 +1,28 @@
+import { Request } from "express";
+
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
 // Create uploads directory if it doesn't exist
-const uploadDir = "uploads/";
+const uploadDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function (
+    req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void,
+  ) {
     cb(null, uploadDir);
   },
-  filename: (req, file, cb) => {
+  filename: (
+    req: Request,
+    file: Express.Multer.File,
+    cb: (error: Error | null, destination: string) => void,
+  ) => {
     const uniqueName =
       Date.now() +
       "-" +
@@ -25,3 +35,4 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 module.exports = upload;
+export {};

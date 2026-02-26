@@ -26,3 +26,4 @@ router.put("/update/:id", validate(createAndUpdateTodoSchema), updateTodo);
 router.delete("/delete/:id", deletedTodo);
 
 module.exports = router;
+export {};

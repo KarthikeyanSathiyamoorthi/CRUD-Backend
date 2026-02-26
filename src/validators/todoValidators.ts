@@ -6,3 +6,4 @@ const createAndUpdateTodoSchema = Joi.object({
 });
 
 module.exports = { createAndUpdateTodoSchema };
+export {};

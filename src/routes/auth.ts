@@ -28,3 +28,4 @@ router.post("/logout", logout);
 router.get("/me", authenticateToken, protectedRoute);
 
 module.exports = router;
+export {};
